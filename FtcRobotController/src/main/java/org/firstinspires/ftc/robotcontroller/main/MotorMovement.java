@@ -1,26 +1,22 @@
 
 package org.firstinspires.ftc.robotcontroller.main;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
-@TeleOp
-public class hello_world extends LinearOpMode {
+public class MotorMovement {
 
     // Declare OpMode members for each of the 4 motors.
-    private ElapsedTime runtime = new ElapsedTime();
     private DcMotorEx frontLeft = null;
     private DcMotorEx backLeft = null;
     private DcMotorEx frontRight = null;
     private DcMotorEx backRight = null;
 
-    @Override
-    public void runOpMode() {
-
+    public void Init(HardwareMap hardwareMap) {
         frontLeft = hardwareMap.get(DcMotorEx.class, "lf");
         backLeft = hardwareMap.get(DcMotorEx.class, "lb");
         frontRight = hardwareMap.get(DcMotorEx.class, "rf");
@@ -30,19 +26,6 @@ public class hello_world extends LinearOpMode {
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.FORWARD);
         backRight.setDirection(DcMotor.Direction.FORWARD);
-
-        telemetry.addData("Status", "Initialized");
-        telemetry.update();
-
-        waitForStart();
-        runtime.reset();
-
-        while (opModeIsActive()) {
-            RawMove(0.3, 0, 0);
-            if (getRuntime()>=1) {
-                RawMove(0.3, 0.3, 0);
-            }
-        }
     }
     public double ClampWheel(double power, double max) {
         if (max > 1.0) {
@@ -78,12 +61,6 @@ public class hello_world extends LinearOpMode {
         frontRight.setPower(frontRightPower);
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
-
-        //debug
-        telemetry.addData("Status", "Run Time: " + runtime.toString());
-        telemetry.addData("Front left/Right", "%4.2f, %4.2f", frontLeftPower, frontRightPower);
-        telemetry.addData("Back  left/Right", "%4.2f, %4.2f", backLeftPower, backRightPower);
-        telemetry.update();
     }
 
     public void StopMove() {
