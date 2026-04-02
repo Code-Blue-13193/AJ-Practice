@@ -28,6 +28,11 @@ public class MotorMovement {
         backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
     public double ClampWheel(double power, double max) {
         if (max > 1.0) {
@@ -64,17 +69,13 @@ public class MotorMovement {
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
     }
+    //deprecated ^^^
 
-    public void EncoderMove(double axial, double lateral, double yaw, int distance, double speed) {
+    public void EncoderMoveStraight(int distance, double speed) {
         frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        frontLeft.setVelocity(speed);
-        backLeft.setVelocity(speed);
-        frontRight.setVelocity(speed);
-        backRight.setVelocity(speed);
 
         frontLeft.setTargetPosition(distance);
         backLeft.setTargetPosition(distance);
@@ -85,6 +86,33 @@ public class MotorMovement {
         backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        frontLeft.setPower(speed);
+        backLeft.setPower(speed);
+        frontRight.setPower(speed);
+        backRight.setPower(speed);
+    }
+
+    public void EncoderMoveLateral(int distance, double speed) {
+        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        frontLeft.setTargetPosition(-distance);
+        backLeft.setTargetPosition(distance);
+        frontRight.setTargetPosition(distance);
+        backRight.setTargetPosition(-distance);
+
+        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        frontLeft.setPower(speed);
+        backLeft.setPower(speed);
+        frontRight.setPower(speed);
+        backRight.setPower(speed);
     }
 
     public void StopMove() {
@@ -94,8 +122,24 @@ public class MotorMovement {
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
-    public int HighestEncoder() {
-        return Math.max(frontLeft.getCurrentPosition(),Math.max(backLeft.getCurrentPosition(), Math.max(frontRight.getCurrentPosition(), backRight.getCurrentPosition())));
+    public boolean AllEncodersBusy() {
+        return !(!frontLeft.isBusy()||!backLeft.isBusy()||!frontRight.isBusy()||!backRight.isBusy());
+    }
+
+    public String GetMotorModes() {
+        return "fl:" + frontLeft.getMode().toString()+", bl:" + backLeft.getMode().toString()+ ", fr:" + frontRight.getMode().toString()+ ", br:" + backRight.getMode().toString();
+    }
+
+    public String GetMotorTargets() {
+        return "fl:" + frontLeft.getTargetPosition()+", bl:" + backLeft.getTargetPosition()+ ", fr:" + frontRight.getTargetPosition()+ ", br:" + backRight.getTargetPosition();
+    }
+
+    public String GetMotorVelocities() {
+        return "fl:" + frontLeft.getPower()+", bl:" + backLeft.getPower()+ ", fr:" + frontRight.getPower()+ ", br:" + backRight.getPower();
+    }
+
+    public String GetMotorPositions() {
+        return "fl:" + frontLeft.getCurrentPosition()+", bl:" + backLeft.getCurrentPosition()+ ", fr:" + frontRight.getCurrentPosition()+ ", br:" + backRight.getCurrentPosition();
     }
 }
 
