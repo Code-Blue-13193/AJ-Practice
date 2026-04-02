@@ -1,11 +1,8 @@
 
 package org.firstinspires.ftc.robotcontroller.main;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class MotorMovement {
@@ -68,15 +65,20 @@ public class MotorMovement {
         backRight.setPower(backRightPower);
     }
 
-    public void EncoderMove(double axial, double lateral, double yaw, int distance) {
+    public void EncoderMove(double axial, double lateral, double yaw, int distance, double speed) {
         frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        frontLeft.setVelocity(speed);
+        backLeft.setVelocity(speed);
+        frontRight.setVelocity(speed);
+        backRight.setVelocity(speed);
+
         frontLeft.setTargetPosition(distance);
         backLeft.setTargetPosition(distance);
-        frontRight.setTargetPosition(distance);;
+        frontRight.setTargetPosition(distance);
         backRight.setTargetPosition(distance);
 
         frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);

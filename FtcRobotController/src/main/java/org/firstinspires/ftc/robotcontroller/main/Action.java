@@ -1,8 +1,8 @@
-package org.firstinspires.ftc.robotcontroller.internal;
+package org.firstinspires.ftc.robotcontroller.main;
 
 public class Action {
     public ActionType action;
-    public double distance;
+    public int distance;
     public double speed;
     public boolean started = false;
     public boolean completed = false;

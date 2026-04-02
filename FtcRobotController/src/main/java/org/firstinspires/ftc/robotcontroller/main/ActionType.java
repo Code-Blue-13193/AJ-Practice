@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.robotcontroller.internal;
+package org.firstinspires.ftc.robotcontroller.main;
 
 public enum ActionType {
     MOVE_STRAIGHT,
