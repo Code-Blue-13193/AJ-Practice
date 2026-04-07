@@ -26,11 +26,6 @@ public class ActionQueue extends OpMode {
     public void loop() {
         //data
         telemetry.addData("Runtime", getRuntime());
-        telemetry.addData("All Encoders Busy", movement.AllEncodersBusy());
-        telemetry.addData("Motor Positions", movement.GetMotorPositions());
-        telemetry.addData("Motor Modes", movement.GetMotorModes());
-        telemetry.addData("Motor Targets", movement.GetMotorTargets());
-        telemetry.addData("Motor Velocities", movement.GetMotorVelocities());
         //start action
         if (!currentAction.started) {
             telemetry.addLine("Started action " + currentAction.action.toString());
@@ -39,10 +34,10 @@ public class ActionQueue extends OpMode {
             currentAction.started = true;
             if (currentAction.action==ActionType.MOVE_STRAIGHT) {
                 telemetry.addLine("Triggered encoder movement");
-                movement.EncoderMoveStraight(currentAction.distance, currentAction.speed);
+                movement.RawMove(currentAction.distance, 0, 0);
             }
             else if (currentAction.action==ActionType.MOVE_LATERAL) {
-                movement.EncoderMoveLateral(currentAction.distance, currentAction.speed);
+                movement.RawMove(0, 0, currentAction.speed);
             }
         }
         //complete action
@@ -59,7 +54,7 @@ public class ActionQueue extends OpMode {
         else {
             if (currentAction.action==ActionType.MOVE_STRAIGHT) {
                 telemetry.addData("Performing action", currentAction.action.toString());
-                if (!movement.AllEncodersBusy()) {
+                if (!movement.AllMotorsBusy()) {
                     telemetry.addLine("Attempting to complete action " + currentAction.action.toString());
                     currentAction.Complete();
                     movement.StopMove();

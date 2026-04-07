@@ -1,6 +1,7 @@
 
 package org.firstinspires.ftc.robotcontroller.main;
 
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -13,26 +14,21 @@ public class MotorMovement {
     private DcMotorEx frontRight = null;
     private DcMotorEx backRight = null;
 
+    private GoBildaPinpointDriver odo = null;
+
+
     public void Init(HardwareMap hardwareMap) {
         frontLeft = hardwareMap.get(DcMotorEx.class, "lf");
         backLeft = hardwareMap.get(DcMotorEx.class, "lb");
         frontRight = hardwareMap.get(DcMotorEx.class, "rf");
         backRight = hardwareMap.get(DcMotorEx.class, "rb");
 
+        odo = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.FORWARD);
         backRight.setDirection(DcMotor.Direction.FORWARD);
-
-        frontLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        backRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
     public double ClampWheel(double power, double max) {
         if (max > 1.0) {
@@ -69,60 +65,15 @@ public class MotorMovement {
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
     }
-    //deprecated ^^^
-
-    public void EncoderMoveStraight(int distance, double speed) {
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        frontLeft.setTargetPosition(distance);
-        backLeft.setTargetPosition(distance);
-        frontRight.setTargetPosition(distance);
-        backRight.setTargetPosition(distance);
-
-        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        frontLeft.setPower(speed);
-        backLeft.setPower(speed);
-        frontRight.setPower(speed);
-        backRight.setPower(speed);
-    }
-
-    public void EncoderMoveLateral(int distance, double speed) {
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        frontLeft.setTargetPosition(-distance);
-        backLeft.setTargetPosition(distance);
-        frontRight.setTargetPosition(distance);
-        backRight.setTargetPosition(-distance);
-
-        frontLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        frontRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        backRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        frontLeft.setPower(speed);
-        backLeft.setPower(speed);
-        frontRight.setPower(speed);
-        backRight.setPower(speed);
-    }
 
     public void StopMove() {
-        frontLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        frontRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        backRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontLeft.setPower(0);
+        backLeft.setPower(0);
+        frontRight.setPower(0);
+        backRight.setPower(0);
     }
 
-    public boolean AllEncodersBusy() {
+    public boolean AllMotorsBusy() {
         return !(!frontLeft.isBusy()||!backLeft.isBusy()||!frontRight.isBusy()||!backRight.isBusy());
     }
 
@@ -130,16 +81,8 @@ public class MotorMovement {
         return "fl:" + frontLeft.getMode().toString()+", bl:" + backLeft.getMode().toString()+ ", fr:" + frontRight.getMode().toString()+ ", br:" + backRight.getMode().toString();
     }
 
-    public String GetMotorTargets() {
-        return "fl:" + frontLeft.getTargetPosition()+", bl:" + backLeft.getTargetPosition()+ ", fr:" + frontRight.getTargetPosition()+ ", br:" + backRight.getTargetPosition();
-    }
-
     public String GetMotorVelocities() {
         return "fl:" + frontLeft.getPower()+", bl:" + backLeft.getPower()+ ", fr:" + frontRight.getPower()+ ", br:" + backRight.getPower();
-    }
-
-    public String GetMotorPositions() {
-        return "fl:" + frontLeft.getCurrentPosition()+", bl:" + backLeft.getCurrentPosition()+ ", fr:" + frontRight.getCurrentPosition()+ ", br:" + backRight.getCurrentPosition();
     }
 }
 
