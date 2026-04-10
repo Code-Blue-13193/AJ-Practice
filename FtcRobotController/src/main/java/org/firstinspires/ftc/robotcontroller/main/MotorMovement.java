@@ -4,9 +4,11 @@ package org.firstinspires.ftc.robotcontroller.main;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-
-public class MotorMovement {
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+@TeleOp
+public class MotorMovement extends OpMode {
 
     // Declare OpMode members for each of the 4 motors.
     private DcMotorEx frontLeft = null;
@@ -14,21 +16,28 @@ public class MotorMovement {
     private DcMotorEx frontRight = null;
     private DcMotorEx backRight = null;
 
-    private GoBildaPinpointDriver odo = null;
+    private GoBildaPinpointDriver pinpoint = null;
 
+    DistanceUnit distanceUnit = DistanceUnit.CM;
 
-    public void Init(HardwareMap hardwareMap) {
+    //HARDWARE MAP NULL????
+
+    @Override
+    public void init() {
         frontLeft = hardwareMap.get(DcMotorEx.class, "lf");
         backLeft = hardwareMap.get(DcMotorEx.class, "lb");
         frontRight = hardwareMap.get(DcMotorEx.class, "rf");
         backRight = hardwareMap.get(DcMotorEx.class, "rb");
 
-        odo = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
 
         frontLeft.setDirection(DcMotor.Direction.REVERSE);
         backLeft.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.FORWARD);
         backRight.setDirection(DcMotor.Direction.FORWARD);
+
+        pinpoint.setOffsets(-100.0, -100.0, distanceUnit);
+        pinpoint.resetPosAndIMU();
     }
     public double ClampWheel(double power, double max) {
         if (max > 1.0) {
@@ -84,5 +93,19 @@ public class MotorMovement {
     public String GetMotorVelocities() {
         return "fl:" + frontLeft.getPower()+", bl:" + backLeft.getPower()+ ", fr:" + frontRight.getPower()+ ", br:" + backRight.getPower();
     }
+
+    public String GetDeadWheelPositions() {
+        return pinpoint.getPosition().getX(distanceUnit) + ", " + pinpoint.getPosition().getX(distanceUnit);
+    }
+
+    public Boolean HasDeadwheels() {
+        return (pinpoint!=null);
+    }
+
+    @Override
+    public void loop() {
+        pinpoint.update();
+    }
+
 }
 

@@ -15,9 +15,8 @@ public class ActionQueue extends OpMode {
 
     @Override
     public void init() {
-        movement.Init(hardwareMap);
         //Add actions here!
-        queue.add(DeclareAction(10, ActionType.MOVE_LATERAL, 0.05));
+        queue.add(DeclareAction(10, ActionType.MOVE_LATERAL, 0.02));
         //Don't add actions beyond here
         currentAction = queue.get(0);
     }
@@ -26,6 +25,7 @@ public class ActionQueue extends OpMode {
     public void loop() {
         //data
         telemetry.addData("Runtime", getRuntime());
+        telemetry.addData("Dead wheels", movement.HasDeadwheels());
         //start action
         if (!currentAction.started) {
             telemetry.addLine("Started action " + currentAction.action.toString());
@@ -33,7 +33,6 @@ public class ActionQueue extends OpMode {
             telemetry.addData("Speed", currentAction.speed);
             currentAction.started = true;
             if (currentAction.action==ActionType.MOVE_STRAIGHT) {
-                telemetry.addLine("Triggered encoder movement");
                 movement.RawMove(currentAction.distance, 0, 0);
             }
             else if (currentAction.action==ActionType.MOVE_LATERAL) {
