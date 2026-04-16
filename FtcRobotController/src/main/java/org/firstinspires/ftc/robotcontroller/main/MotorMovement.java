@@ -6,24 +6,22 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 @TeleOp
-public class MotorMovement extends OpMode {
+public class MotorMovement {
 
     // Declare OpMode members for each of the 4 motors.
-    private DcMotorEx frontLeft = null;
-    private DcMotorEx backLeft = null;
-    private DcMotorEx frontRight = null;
-    private DcMotorEx backRight = null;
+    public DcMotorEx frontLeft;
+    public DcMotorEx backLeft;
+    public DcMotorEx frontRight;
+    public DcMotorEx backRight;
 
-    private GoBildaPinpointDriver pinpoint = null;
+    public GoBildaPinpointDriver pinpoint = null;
 
     DistanceUnit distanceUnit = DistanceUnit.CM;
-
-    //HARDWARE MAP NULL????
-
-    @Override
-    public void init() {
+    public void init(HardwareMap hardwareMap) {
         frontLeft = hardwareMap.get(DcMotorEx.class, "lf");
         backLeft = hardwareMap.get(DcMotorEx.class, "lb");
         frontRight = hardwareMap.get(DcMotorEx.class, "rf");
@@ -36,7 +34,7 @@ public class MotorMovement extends OpMode {
         frontRight.setDirection(DcMotor.Direction.FORWARD);
         backRight.setDirection(DcMotor.Direction.FORWARD);
 
-        pinpoint.setOffsets(-100.0, -100.0, distanceUnit);
+        pinpoint.setOffsets(0, 0, distanceUnit);
         pinpoint.resetPosAndIMU();
     }
     public double ClampWheel(double power, double max) {
@@ -50,7 +48,7 @@ public class MotorMovement extends OpMode {
         //axial is total movement power
         //lateral is horizontal movement power (from the robots pov)
         //yaw rotates the robot
-
+        Reset();
         //misc var declaration
         double max;
 
@@ -94,17 +92,32 @@ public class MotorMovement extends OpMode {
         return "fl:" + frontLeft.getPower()+", bl:" + backLeft.getPower()+ ", fr:" + frontRight.getPower()+ ", br:" + backRight.getPower();
     }
 
+    public String GetMotors() {
+        return "fl:" + Boolean.toString(frontLeft!=null) + ", bl:" + Boolean.toString(backLeft!=null)+ ", fr:" + Boolean.toString(frontRight!=null)+ ", br:" + Boolean.toString(backRight!=null);
+    }
+
     public String GetDeadWheelPositions() {
         return pinpoint.getPosition().getX(distanceUnit) + ", " + pinpoint.getPosition().getX(distanceUnit);
     }
 
-    public Boolean HasDeadwheels() {
+    public Boolean HasDeadWheels() {
         return (pinpoint!=null);
     }
 
-    @Override
-    public void loop() {
+    public void Update() {
         pinpoint.update();
+    }
+
+    public void Reset() {
+        pinpoint.resetPosAndIMU();
+    }
+
+    public double GetX() {
+        return Math.abs(pinpoint.getPosX(distanceUnit));
+    }
+
+    public double GetY() {
+        return Math.abs(pinpoint.getPosY(distanceUnit));
     }
 
 }

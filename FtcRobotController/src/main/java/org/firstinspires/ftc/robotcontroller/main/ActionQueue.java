@@ -2,6 +2,7 @@ package org.firstinspires.ftc.robotcontroller.main;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -16,16 +17,24 @@ public class ActionQueue extends OpMode {
     @Override
     public void init() {
         //Add actions here!
-        queue.add(DeclareAction(10, ActionType.MOVE_LATERAL, 0.02));
+        queue.add(DeclareAction(2, ActionType.MOVE_LATERAL, 0.5));
+        queue.add(DeclareAction(5, ActionType.MOVE_STRAIGHT, 0.5));
+        queue.add(DeclareAction(-2, ActionType.MOVE_LATERAL, 0.5));
+        queue.add(DeclareAction(-5, ActionType.MOVE_STRAIGHT, 0.5));
         //Don't add actions beyond here
         currentAction = queue.get(0);
+
+        movement.init(hardwareMap);
+        movement.Reset();
     }
 
     @Override
     public void loop() {
         //data
         telemetry.addData("Runtime", getRuntime());
-        telemetry.addData("Dead wheels", movement.HasDeadwheels());
+        telemetry.addData("Motors", movement.GetMotors());
+        telemetry.addData("Dead wheels", movement.HasDeadWheels());
+        telemetry.addData("Queue Remaining", queue.toArray().length-queuePos+1);
         //start action
         if (!currentAction.started) {
             telemetry.addLine("Started action " + currentAction.action.toString());
@@ -33,10 +42,10 @@ public class ActionQueue extends OpMode {
             telemetry.addData("Speed", currentAction.speed);
             currentAction.started = true;
             if (currentAction.action==ActionType.MOVE_STRAIGHT) {
-                movement.RawMove(currentAction.distance, 0, 0);
+                movement.RawMove(currentAction.speed, 0, 0);
             }
             else if (currentAction.action==ActionType.MOVE_LATERAL) {
-                movement.RawMove(0, 0, currentAction.speed);
+                movement.RawMove(0,  currentAction.speed, 0);
             }
         }
         //complete action
@@ -48,15 +57,27 @@ public class ActionQueue extends OpMode {
                 return;
             }
             currentAction = queue.get(queuePos);
+            currentAction.completed=false;
         }
         //mid action
         else {
+            telemetry.addData("Performing action", currentAction.action.toString());
             if (currentAction.action==ActionType.MOVE_STRAIGHT) {
-                telemetry.addData("Performing action", currentAction.action.toString());
-                if (!movement.AllMotorsBusy()) {
-                    telemetry.addLine("Attempting to complete action " + currentAction.action.toString());
+                movement.Update();
+                telemetry.addData("pos", movement.GetY());
+                if (movement.GetY()>=Math.abs(currentAction.distance)) {
                     currentAction.Complete();
                     movement.StopMove();
+                    movement.Reset();
+                }
+            }
+            else if (currentAction.action==ActionType.MOVE_LATERAL) {
+                movement.Update();
+                telemetry.addData("pos", movement.GetX());
+                if (movement.GetX()>=Math.abs(currentAction.distance)) {
+                    currentAction.Complete();
+                    movement.StopMove();
+                    movement.Reset();
                 }
             }
         }
