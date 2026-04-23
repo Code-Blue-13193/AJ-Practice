@@ -4,12 +4,12 @@ package org.firstinspires.ftc.robotcontroller.main;
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-@TeleOp
+import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
+
 public class MotorMovement {
 
     // Declare OpMode members for each of the 4 motors.
@@ -19,9 +19,10 @@ public class MotorMovement {
     public DcMotorEx backRight;
 
     public GoBildaPinpointDriver pinpoint = null;
+    public Pose2D pose2D;
 
     DistanceUnit distanceUnit = DistanceUnit.CM;
-    public void init(HardwareMap hardwareMap) {
+    public void start(HardwareMap hardwareMap) {
         frontLeft = hardwareMap.get(DcMotorEx.class, "lf");
         backLeft = hardwareMap.get(DcMotorEx.class, "lb");
         frontRight = hardwareMap.get(DcMotorEx.class, "rf");
@@ -34,7 +35,10 @@ public class MotorMovement {
         frontRight.setDirection(DcMotor.Direction.FORWARD);
         backRight.setDirection(DcMotor.Direction.FORWARD);
 
-        pinpoint.setOffsets(0, 0, distanceUnit);
+        pinpoint.setOffsets(21, 4.5, distanceUnit);
+        pinpoint.setPosition(new Pose2D(DistanceUnit.CM, 0, 0, AngleUnit.DEGREES, 0));
+        pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        pinpoint.setEncoderDirections(GoBildaPinpointDriver.EncoderDirection.REVERSED, GoBildaPinpointDriver.EncoderDirection.FORWARD);
         pinpoint.resetPosAndIMU();
     }
     public double ClampWheel(double power, double max) {
@@ -106,19 +110,11 @@ public class MotorMovement {
 
     public void Update() {
         pinpoint.update();
+        pose2D = pinpoint.getPosition();
     }
 
     public void Reset() {
-        pinpoint.resetPosAndIMU();
+        pinpoint.setPosition(new Pose2D(DistanceUnit.CM, 0, 0, AngleUnit.DEGREES, 0));
     }
-
-    public double GetX() {
-        return Math.abs(pinpoint.getPosX(distanceUnit));
-    }
-
-    public double GetY() {
-        return Math.abs(pinpoint.getPosY(distanceUnit));
-    }
-
 }
 
