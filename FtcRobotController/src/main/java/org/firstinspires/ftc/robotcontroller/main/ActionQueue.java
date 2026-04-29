@@ -20,11 +20,7 @@ public class ActionQueue extends OpMode {
     @Override
     public void init() {
         //Add actions here!
-        queue.add(DeclareAction(100, ActionType.MOVE_LATERAL, 0.5));
-        queue.add(DeclareAction(100, ActionType.MOVE_STRAIGHT, 0.5));
-        queue.add(DeclareAction(-100, ActionType.MOVE_STRAIGHT, 0.3));
-        //queue.add(DeclareAction(-100, ActionType.MOVE_LATERAL, 0.5));
-        //queue.add(DeclareAction(10, ActionType.WAIT, 0.5));
+        queue.add(DeclareAction(100, ActionType.ROTATE, 0.2));
         //Don't add actions beyond here
         currentAction = queue.get(0);
         queuePos = 0;
@@ -50,17 +46,20 @@ public class ActionQueue extends OpMode {
             currentAction.started = true;
             movement.Reset();
             if (currentAction.action==ActionType.MOVE_STRAIGHT) {
-                movement.RawMove(currentAction.speed, 0, 0);
+                movement.RawMove(currentAction.speed*Math.signum(currentAction.distance), 0, 0);
             }
             else if (currentAction.action==ActionType.MOVE_LATERAL) {
-                movement.RawMove(0,  currentAction.speed, 0);
+                movement.RawMove(0,  currentAction.speed*Math.signum(currentAction.distance), 0);
+            }
+            else if (currentAction.action==ActionType.ROTATE) {
+                movement.RawMove(0,  0, currentAction.speed*Math.signum(currentAction.distance));
             }
         }
         else if (currentAction.completed) {
             telemetry.addLine("Completed action " + currentAction.action.toString());
             queuePos+=1;
             if (queuePos>=queue.toArray().length) {
-                //terminateOpModeNow();
+                terminateOpModeNow();
                 return;
             }
             currentAction = queue.get(queuePos);
@@ -86,6 +85,11 @@ public class ActionQueue extends OpMode {
                     movement.StopMove();
                     movement.Reset();
                 }
+            }
+            else if (currentAction.action==ActionType.ROTATE) {
+                movement.Update();
+                telemetry.addData("posX", movement.pose2D.getX(distanceUnit));
+                telemetry.addData("posY", movement.pose2D.getY(distanceUnit));
             }
             else if (currentAction.action==ActionType.WAIT) {
                 movement.Update();
