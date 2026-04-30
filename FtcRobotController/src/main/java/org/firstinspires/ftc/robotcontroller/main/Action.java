@@ -5,6 +5,7 @@ public class Action {
     public int distance;
     public double speed;
     public boolean started = false;
+    public double startCount = 0.1;
     public boolean completed = false;
 
     public void Complete() {

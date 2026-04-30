@@ -20,6 +20,12 @@ public class MotorMovement {
 
     public GoBildaPinpointDriver pinpoint = null;
     public Pose2D pose2D;
+    public Pose2D prevPose2D;
+
+    double frontLeftPower;
+    double frontRightPower;
+    double backLeftPower;
+    double backRightPower;
 
     DistanceUnit distanceUnit = DistanceUnit.CM;
     public void start(HardwareMap hardwareMap) {
@@ -57,10 +63,10 @@ public class MotorMovement {
         double max;
 
         //calc motor power
-        double frontLeftPower  = axial + lateral + yaw;
-        double frontRightPower = axial - lateral - yaw;
-        double backLeftPower   = axial - lateral + yaw;
-        double backRightPower  = axial + lateral - yaw;
+        frontLeftPower  = axial + lateral + yaw;
+        frontRightPower = axial - lateral - yaw;
+        backLeftPower   = axial - lateral + yaw;
+        backRightPower  = axial + lateral - yaw;
 
         //limit motor powers
         max = Math.max(Math.abs(frontLeftPower), Math.max(Math.abs(frontRightPower), Math.max(Math.abs(backLeftPower), Math.abs(backRightPower))));
@@ -75,6 +81,21 @@ public class MotorMovement {
         frontRight.setPower(frontRightPower);
         backLeft.setPower(backLeftPower);
         backRight.setPower(backRightPower);
+    }
+
+    public void CorrectDriftY(double dist) {
+        if (pose2D.getX(distanceUnit)- prevPose2D.getX(distanceUnit)<-0.05||pose2D.getX(distanceUnit)<-0.8) {
+            frontRight.setPower(frontRightPower-(0.1*Math.signum(dist)));
+            frontLeft.setPower(frontLeftPower+(0.1*Math.signum(dist)));
+        }
+        else if (pose2D.getX(distanceUnit)- prevPose2D.getX(distanceUnit)>0.05||pose2D.getX(distanceUnit)>0.8) {
+            frontRight.setPower(frontRightPower+(0.1*Math.signum(dist)));
+            frontLeft.setPower(frontLeftPower-(0.1*Math.signum(dist)));
+        }
+        else {
+            frontRight.setPower(frontRightPower);
+            frontLeft.setPower(frontLeftPower);
+        }
     }
 
     public void StopMove() {
@@ -109,6 +130,7 @@ public class MotorMovement {
     }
 
     public void Update() {
+        prevPose2D = pose2D;
         pinpoint.update();
         pose2D = pinpoint.getPosition();
     }

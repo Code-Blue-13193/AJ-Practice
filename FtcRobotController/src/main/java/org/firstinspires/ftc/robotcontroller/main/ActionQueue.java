@@ -17,10 +17,17 @@ public class ActionQueue extends OpMode {
     Action currentAction;
     DistanceUnit distanceUnit = DistanceUnit.CM;
 
+    double deltaTime;
+    double prevRuntime = 0;
+
     @Override
     public void init() {
         //Add actions here!
-        queue.add(DeclareAction(100, ActionType.ROTATE, 0.2));
+        queue.add(DeclareAction(100, ActionType.MOVE_STRAIGHT, 0.4));
+        queue.add(DeclareAction(100, ActionType.MOVE_LATERAL, 0.4));
+        queue.add(DeclareAction(-100, ActionType.MOVE_STRAIGHT, 0.4));
+        queue.add(DeclareAction(-100, ActionType.MOVE_LATERAL, 0.4));
+        //queue.add(DeclareAction(100, ActionType.ROTATE, 0.2));
         //Don't add actions beyond here
         currentAction = queue.get(0);
         queuePos = 0;
@@ -31,28 +38,39 @@ public class ActionQueue extends OpMode {
 
     @Override
     public void loop() {
+
+        deltaTime = getRuntime() - prevRuntime;
+
         //data
-        telemetry.addLine("Testing");
         telemetry.addData("Runtime", getRuntime());
-        telemetry.addData("Motors", movement.GetMotors());
-        telemetry.addData("Dead wheels", movement.HasDeadWheels());
+        telemetry.addData("Prev runtime", prevRuntime);
+        telemetry.addData("Delta time", deltaTime);
         telemetry.addData("Queue Pos", queuePos);
         telemetry.addData("Queue Length", queue.toArray().length);
+
+        movement.Update();
+
         //action
         if (!currentAction.started) {
-            telemetry.addLine("Started action " + currentAction.action.toString());
+            telemetry.addLine("Starting action " + currentAction.action.toString());
+            telemetry.addLine("Time until start: " + currentAction.startCount);
             telemetry.addData("Dist", currentAction.distance);
             telemetry.addData("Speed", currentAction.speed);
-            currentAction.started = true;
             movement.Reset();
-            if (currentAction.action==ActionType.MOVE_STRAIGHT) {
-                movement.RawMove(currentAction.speed*Math.signum(currentAction.distance), 0, 0);
+            if (currentAction.startCount>0) {
+                currentAction.startCount -= deltaTime;
             }
-            else if (currentAction.action==ActionType.MOVE_LATERAL) {
-                movement.RawMove(0,  currentAction.speed*Math.signum(currentAction.distance), 0);
-            }
-            else if (currentAction.action==ActionType.ROTATE) {
-                movement.RawMove(0,  0, currentAction.speed*Math.signum(currentAction.distance));
+            else {
+                currentAction.started = true;
+                if (currentAction.action==ActionType.MOVE_STRAIGHT) {
+                    movement.RawMove(currentAction.speed*Math.signum(currentAction.distance), 0, 0);
+                }
+                else if (currentAction.action==ActionType.MOVE_LATERAL) {
+                    movement.RawMove(0,  currentAction.speed*Math.signum(currentAction.distance), 0);
+                }
+                else if (currentAction.action==ActionType.ROTATE) {
+                    movement.RawMove(0,  0, currentAction.speed*Math.signum(currentAction.distance));
+                }
             }
         }
         else if (currentAction.completed) {
@@ -69,8 +87,6 @@ public class ActionQueue extends OpMode {
         else {
             telemetry.addData("Performing action", currentAction.action.toString());
             if (currentAction.action==ActionType.MOVE_STRAIGHT) {
-                movement.Update();
-                telemetry.addData("pos", movement.pose2D.getX(distanceUnit));
                 if (Math.abs( movement.pose2D.getX(distanceUnit))>=Math.abs(currentAction.distance)) {
                     currentAction.Complete();
                     movement.StopMove();
@@ -78,8 +94,7 @@ public class ActionQueue extends OpMode {
                 }
             }
             else if (currentAction.action==ActionType.MOVE_LATERAL) {
-                movement.Update();
-                telemetry.addData("pos", movement.pose2D.getY(distanceUnit));
+                movement.CorrectDriftY(currentAction.distance);
                 if (Math.abs(movement.pose2D.getY(distanceUnit))>=Math.abs(currentAction.distance)) {
                     currentAction.Complete();
                     movement.StopMove();
@@ -87,17 +102,15 @@ public class ActionQueue extends OpMode {
                 }
             }
             else if (currentAction.action==ActionType.ROTATE) {
-                movement.Update();
-                telemetry.addData("posX", movement.pose2D.getX(distanceUnit));
-                telemetry.addData("posY", movement.pose2D.getY(distanceUnit));
+                //
             }
             else if (currentAction.action==ActionType.WAIT) {
-                movement.Update();
-                telemetry.addData("posX", movement.pose2D.getX(distanceUnit));
-                telemetry.addData("posY", movement.pose2D.getY(distanceUnit));
+               //
             }
+            LogPos();
         }
         telemetry.update();
+        prevRuntime = getRuntime();
     }
 
     public Action DeclareAction(int distance, ActionType action, double speed) {
@@ -107,4 +120,10 @@ public class ActionQueue extends OpMode {
         newAction.speed = speed;
         return newAction;
     }
+
+    public void LogPos() {
+        telemetry.addData("posX", movement.pose2D.getX(distanceUnit));
+        telemetry.addData("posY", movement.pose2D.getY(distanceUnit));
+    }
+
 }
