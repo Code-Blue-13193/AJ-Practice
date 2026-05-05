@@ -23,11 +23,7 @@ public class ActionQueue extends OpMode {
     @Override
     public void init() {
         //Add actions here!
-        queue.add(DeclareAction(100, ActionType.MOVE_STRAIGHT, 0.4));
-        queue.add(DeclareAction(100, ActionType.MOVE_LATERAL, 0.4));
-        queue.add(DeclareAction(-100, ActionType.MOVE_STRAIGHT, 0.4));
-        queue.add(DeclareAction(-100, ActionType.MOVE_LATERAL, 0.4));
-        //queue.add(DeclareAction(100, ActionType.ROTATE, 0.2));
+        queue.add(DeclareAction(90, ActionType.ROTATE, 0.3));
         //Don't add actions beyond here
         currentAction = queue.get(0);
         queuePos = 0;
@@ -43,10 +39,8 @@ public class ActionQueue extends OpMode {
 
         //data
         telemetry.addData("Runtime", getRuntime());
-        telemetry.addData("Prev runtime", prevRuntime);
         telemetry.addData("Delta time", deltaTime);
-        telemetry.addData("Queue Pos", queuePos);
-        telemetry.addData("Queue Length", queue.toArray().length);
+        telemetry.addLine("Queue " + queuePos + "/" + queue.toArray().length);
 
         movement.Update();
 
@@ -102,7 +96,15 @@ public class ActionQueue extends OpMode {
                 }
             }
             else if (currentAction.action==ActionType.ROTATE) {
-                //
+                double rotation = Math.atan2(movement.pose2D.getX(distanceUnit),movement.pose2D.getY(distanceUnit));
+                rotation = (rotation + 2 * Math.PI) % (2 * Math.PI);
+                rotation = Math.toDegrees(rotation);
+                telemetry.addData("Rotation", rotation);
+                if (Math.abs(rotation- currentAction.distance)<0.3) {
+                    currentAction.Complete();
+                    movement.StopMove();
+                    movement.Reset();
+                }
             }
             else if (currentAction.action==ActionType.WAIT) {
                //
