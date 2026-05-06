@@ -24,6 +24,7 @@ public class ActionQueue extends OpMode {
     public void init() {
         //Add actions here!
         queue.add(DeclareAction(90, ActionType.ROTATE, 0.3));
+        queue.add(DeclareAction(-90, ActionType.ROTATE, 0.3));
         //Don't add actions beyond here
         currentAction = queue.get(0);
         queuePos = 0;
@@ -63,7 +64,7 @@ public class ActionQueue extends OpMode {
                     movement.RawMove(0,  currentAction.speed*Math.signum(currentAction.distance), 0);
                 }
                 else if (currentAction.action==ActionType.ROTATE) {
-                    movement.RawMove(0,  0, currentAction.speed*Math.signum(currentAction.distance));
+                    movement.RawMove(0,  0, currentAction.speed*-Math.signum(currentAction.distance));
                 }
             }
         }
@@ -96,11 +97,12 @@ public class ActionQueue extends OpMode {
                 }
             }
             else if (currentAction.action==ActionType.ROTATE) {
-                double rotation = Math.atan2(movement.pose2D.getX(distanceUnit),movement.pose2D.getY(distanceUnit));
-                rotation = (rotation + 2 * Math.PI) % (2 * Math.PI);
-                rotation = Math.toDegrees(rotation);
+                double rotation = Math.atan2(movement.pose2D.getY(distanceUnit),movement.pose2D.getX(distanceUnit));
+                rotation = Math.toDegrees(rotation); //to degrees
+                rotation = rotation + (rotation<0? 360 : 0); //remove negative angles
+                double desiredRot = currentAction.distance + (currentAction.distance<0? 360 : 0); //turn desired rotation positive
                 telemetry.addData("Rotation", rotation);
-                if (Math.abs(rotation- currentAction.distance)<0.3) {
+                if (Math.abs(rotation- desiredRot)<15||Math.abs(desiredRot-rotation)<15) {
                     currentAction.Complete();
                     movement.StopMove();
                     movement.Reset();
